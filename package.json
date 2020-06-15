@@ -1,0 +1,26 @@
+{
+    "name": "simple_ecommerce_contract",
+    "version": "1.0.0",
+    "description": "Simple Ecommerce Worked With Blockchain",
+    "main": "index.js",
+    "scripts": {
+        "start": "node index.js"
+    },
+    "dependencies": {
+        "@hapi/joi": "^17.1.1",
+        "@truffle/contract": "^4.0.34",
+        "body-parser": "^1.18.3",
+        "bootstrap": "^4.3.1",
+        "ejs": "^2.6.1",
+        "express": "^4.16.4",
+        "express-session": "^1.17.0",
+        "holderjs": "^2.9.6",
+        "http-errors": "^1.7.2",
+        "jquery": "^3.4.0",
+        "multer": "^1.4.1",
+        "mysql": "^2.18.1",
+        "nodemon": "^2.0.2",
+        "toastr": "^2.1.4",
+        "web3": "^1.2.6"
+    }
+}

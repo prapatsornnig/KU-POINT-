@@ -1,0 +1,86 @@
+const fs = require('fs');
+const path = require('path');
+const Web3 = require('web3');
+const TruffleContract = require('@truffle/contract');
+
+const web3Provider = new Web3.providers.HttpProvider('http://localhost:7545');
+const web3 = new Web3(web3Provider);
+
+//---------------------------------------------------------------------------------------------------------------------------------
+// var firstBlock = web3.eth.getBlock("genesis");
+// var firstBlockNo = firstBlock.number;
+// var currentBlockNo = web3.eth.getBlockNumber();
+// var transactions = [];
+// var i=0;
+// for (i;i<currentBlockNo;i++)
+//  transactions[i] = getTransactionFromBlock(firstBlockNo, 1);
+//---------------------------------------------------------------------------------------------------------------------------------
+
+const createContractInstance = async artifactName => {
+ const artifact = JSON.parse(fs.readFileSync(path.join(__dirname, 'build/contracts', `${artifactName}.json`)));
+  const contract = TruffleContract(artifact);
+  contract.setProvider(web3Provider);
+  return contract.deployed();
+};
+
+let shop;
+createContractInstance('Reward').then(instance => {
+  shop = instance;
+});
+
+const addProduct = async (name, price, quantity, imgPath, seller) => {
+  const timestamp = Date.now();
+  const pid = timestamp;
+  const receipt = await shop.addProduct(pid, name, price, quantity, imgPath, timestamp, { from: seller, gas: 1000000 });
+  //const receipt = await shop.addProduct(pid, name, web3.utils.toWei(price, 'ether'), quantity, imgPath, timestamp, { from: seller, gas: 1000000 });
+
+
+  return { receipt: receipt, pid: pid };
+};
+
+const buyProduct = async (pid, buyer) => {
+  try {
+    const receipt = await shop.buyProduct(pid, Date.now(), { from: buyer, gas: 1000000 });
+    //const receipt = await shop.buyProduct(pid, Date.now(), { from: buyer, gas: 1000000 });
+    return receipt;
+  } catch (error) {
+    if (error.reason) throw new Error(error.reason);
+    throw error;
+  }
+};
+
+const getProduct = async pid => {
+  const product = await shop.getProduct.call(pid);
+  product.id = pid;
+  return product;
+};
+
+const getAllProducts = async () => {
+  const events = await shop.getPastEvents('AddedProduct', { fromBlock: 0 });
+  const allPids = events.map(item => item.returnValues.pid);
+  return allPids;
+};
+
+const getAccounts = () => web3.eth.getAccounts();
+
+const unlockAccount = (address, password) => web3.eth.personal.unlockAccount(address, password);
+
+//const getBalance = () => web3.eth.getBalance(0x87e4be09FDA7c18EE639313c46ee79183e6351bd).then(console.log);
+
+const getBalance = () =>  web3.eth.getBalance("0x7b596B49a608f9384dF42Afa6121aaB120531e35",function(error, balance) {
+  if(!error) {
+      console.log(web3.utils.fromWei(balance, 'ether'));
+  }
+});
+  
+//number, function(error, result) {}); //เพิ่มมา
+
+module.exports = {
+ addProduct,
+ buyProduct,
+ getProduct,
+ getAccounts,
+ unlockAccount,
+ getAllProducts,
+ getBalance, //เพิ่มมา
+}
